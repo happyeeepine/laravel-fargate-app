@@ -12,7 +12,7 @@ on:
       deploy:
         name: Deploy app to AWS Fargate
         runs-on: ubuntu-latest
-        step: 
+        steps: 
           - name: Configure aws credntials for prod
           # if: githug.ref == 'refs/heads/main'
           uses: aws-actions/configure-aws-credentials@v1
