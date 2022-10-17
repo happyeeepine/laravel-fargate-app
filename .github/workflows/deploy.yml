@@ -53,6 +53,8 @@ jobs:
       - run: docker-compose exec -T web npm ci
         if: ${{ !steps.cache-npm-ci.outputs.cache-hit }}
 
+      -run: sudo chown -R 1000:1000 /root/.npm
+
       - run: docker-compose exec -T web npm run prod --loglevel=verbose
 
       - uses: aws-actions/amazon-ecr-login@v1
