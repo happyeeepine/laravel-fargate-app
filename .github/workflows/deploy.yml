@@ -1,23 +1,25 @@
 name: deploy
 
 on:
-  push: 
+  push:
     branches:
       - main
-      - feature/push_images_to_ecr
 
 env:
   AWS_REGION: ap-northeast-1
   IMAGE_TAG: ${{ github.sha }}
   SYSTEM_NAME: example
-  SREVICE_NAME: foobar
-    
+  SERVICE_NAME: foobar
+
 jobs:
   deploy:
     name: Deploy app to AWS Fargate
     runs-on: ubuntu-latest
+
     steps:
-      - uses: aws-actions/configure-aws-credentials@v1
+      - name: Configure aws credentials for prod
+        if: github.ref == 'refs/heads/main'
+        uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
@@ -53,9 +55,7 @@ jobs:
       - run: docker-compose exec -T web npm ci
         if: ${{ !steps.cache-npm-ci.outputs.cache-hit }}
 
-      - run: sudo chown -R 1000:1000 /root/.npm
-
-      - run: docker-compose exec -T web npm run prod --loglevel=verbose
+      - run: docker-compose exec -T web npm run prod
 
       - uses: aws-actions/amazon-ecr-login@v1
         id: amazon-ecr-login
@@ -73,7 +73,6 @@ jobs:
             -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
       - name: Push php image to ecr
         env:
           DOCKER_BUILDKIT: 1
