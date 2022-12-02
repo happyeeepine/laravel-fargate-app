@@ -19,7 +19,6 @@ jobs:
 
     steps:
       - name: Configure aws credentials for prod
-        # test
         # if: github.ref == 'refs/heads/main'
         uses: aws-actions/configure-aws-credentials@v1
         with:
